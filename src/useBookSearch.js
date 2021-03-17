@@ -2,18 +2,16 @@ import React, { useEffect, useState } from "react";
 import axios from 'axios';
 
 export function useBookSearch(query, page){
-   const [index, setIndex] = useState(1);
-   const [data, setData] = useState(null);
-   const source = axios.CancelToken.source();
+   let source = new axios.CancelToken.source(); // setiap dirender ulang, data ini akan dari ulang
 
    useEffect(() => {
       axios({
          method : 'GET',
          url : 'http://openlibrary.org/search.json',
          params : {q : query, page : page},
-         cancelToken : source.token
+         cancelToken : source.token // ini token yang berisi fungsi cancel
       }).then(res => {
-         setData(res.data);
+         console.log(res.data);
       }).catch(err => {
          console.log(err);
          if(axios.isCancel(err)) {
@@ -21,10 +19,9 @@ export function useBookSearch(query, page){
          }
       })
       
-      setIndex(i => i + 1);
-      console.log(index);
-
-      if(index >= 5) source.cancel('Kouta terpenuhi!!!');
+      return() => {
+         source.cancel('BATALKAN!!!'); // setiap component ini di render, berikan fungsi cancel
+      }
       
    }, [query, page])
 
